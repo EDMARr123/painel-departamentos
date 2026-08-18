@@ -370,7 +370,7 @@ footer.foot {
   <header class="top">
     <div class="title-block">
       <h1>Painel Departamentos</h1>
-      <p>Meta mínima por categoria de produto — atualizado em 18/08/2026 14:09</p>
+      <p>Meta mínima por categoria de produto — atualizado em 18/08/2026 14:15</p>
     </div>
     <div style="display:flex;align-items:center;gap:16px;">
       <div class="summary-strip" id="summary"></div>
@@ -439,7 +439,7 @@ function card(rca) {
   const corB = corCategorias(rca.categorias_atingidas, rca.total_categorias);
   const av = corAvatar(rca.nome);
   const foto = rca.codigo === "EQUIPE"
-    ? FOTO_TET
+    ? FOTOS_SUPERVISORES[rca.nome]
     : FOTOS_RCAS[normalizarNomeFoto(rca.nome)];
   const avatarHtml = foto
     ? `<div class="avatar" style="padding:0;overflow:hidden"><img src="${foto}" alt="${rca.nome}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"></div>`
@@ -466,7 +466,9 @@ function card(rca) {
         <p class="meta">RCA ${rca.codigo} · ${rca.rota || rca.supervisor}</p>
       </div>
       <div class="head-actions">
-        ${rca.codigo === "EQUIPE" ? "" : `<span class="badge-status" style="background:var(--${corB}-soft);color:var(--${corB})">${rca.bateu ? "BATEU !" : "NÃO BATEU !"}</span>`}
+        ${rca.codigo === "EQUIPE"
+          ? `<img src="${FOTO_TET}" alt="T&amp;T Alimentos" style="width:28px;height:28px;border-radius:50%;flex:none;">`
+          : `<span class="badge-status" style="background:var(--${corB}-soft);color:var(--${corB})">${rca.bateu ? "BATEU !" : "NÃO BATEU !"}</span>`}
         <button class="icon-btn" title="Imprimir" onclick="window.print()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
         </button>
