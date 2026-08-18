@@ -12,6 +12,7 @@ PASTA_BASE = os.path.dirname(os.path.abspath(__file__))
 CAMINHO_DADOS = os.path.join(PASTA_BASE, "dados.json")
 CAMINHO_SAIDA = os.path.join(PASTA_BASE, "painel.html")
 CAMINHO_LOGO = os.path.join(PASTA_BASE, "logo_tet.png")
+CAMINHO_FOTO_TET = os.path.join(PASTA_BASE, "foto_tet.jpg")
 PASTA_FOTOS_SUPERVISORES = os.path.join(PASTA_BASE, "fotos_supervisores")
 PASTA_FOTOS_RCAS = os.path.join(PASTA_BASE, "fotos_rcas")
 PASTA_SUPERVISORES_SAIDA = os.path.join(PASTA_BASE, "supervisores")
@@ -23,6 +24,17 @@ def _logo_data_uri():
 
 
 _LOGO_TAG = '<img src="{}" alt="T&amp;T Alimentos" style="height:52px;width:auto;flex:none;" />'.format(_logo_data_uri())
+
+
+def _foto_tet_data_uri():
+    """Foto redonda da T&T (avatar), usada no card de resumo do time no
+    lugar da foto do supervisor — o resumo é um total de várias pessoas,
+    não faz sentido mostrar o rosto de uma só."""
+    with open(CAMINHO_FOTO_TET, "rb") as f:
+        return "data:image/jpeg;base64," + base64.b64encode(f.read()).decode("ascii")
+
+
+_FOTO_TET_JSON = json.dumps(_foto_tet_data_uri())
 
 
 def _fotos_json(pasta, com_subpastas):
@@ -446,6 +458,7 @@ footer.foot {
 const DADOS = __DADOS_JSON__;
 const FOTOS_SUPERVISORES = __FOTOS_SUPERVISORES_JSON__;
 const FOTOS_RCAS = __FOTOS_RCAS_JSON__;
+const FOTO_TET = __FOTO_TET_JSON__;
 
 const ORDEM_CATEGORIAS = [
   ["bacon", "Bacon"], ["bovino", "Bovino"], ["batata", "Batata"], ["suino", "Suíno"],
@@ -492,7 +505,7 @@ function card(rca) {
   const corB = corCategorias(rca.categorias_atingidas, rca.total_categorias);
   const av = corAvatar(rca.nome);
   const foto = rca.codigo === "EQUIPE"
-    ? FOTOS_SUPERVISORES[rca.nome]
+    ? FOTO_TET
     : FOTOS_RCAS[normalizarNomeFoto(rca.nome)];
   const avatarHtml = foto
     ? `<div class="avatar" style="padding:0;overflow:hidden"><img src="${foto}" alt="${rca.nome}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"></div>`
@@ -519,7 +532,7 @@ function card(rca) {
         <p class="meta">RCA ${rca.codigo} · ${rca.rota || rca.supervisor}</p>
       </div>
       <div class="head-actions">
-        <span class="badge-status" style="background:var(--${corB}-soft);color:var(--${corB})">${rca.bateu ? "BATEU !" : "NÃO BATEU !"}</span>
+        ${rca.codigo === "EQUIPE" ? "" : `<span class="badge-status" style="background:var(--${corB}-soft);color:var(--${corB})">${rca.bateu ? "BATEU !" : "NÃO BATEU !"}</span>`}
         <button class="icon-btn" title="Imprimir" onclick="window.print()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
         </button>
@@ -640,6 +653,7 @@ def gerar_html(dados, titulo="Painel Departamentos — Equipe GYN"):
     html = TEMPLATE.replace("__DADOS_JSON__", json.dumps(dados, ensure_ascii=False))
     html = html.replace("__FOTOS_SUPERVISORES_JSON__", _FOTOS_SUPERVISORES_JSON)
     html = html.replace("__FOTOS_RCAS_JSON__", _FOTOS_RCAS_JSON)
+    html = html.replace("__FOTO_TET_JSON__", _FOTO_TET_JSON)
     html = html.replace("__DATA_EXTRACAO__", data_extracao)
     html = html.replace("__LOGO_TAG__", _LOGO_TAG)
     html = html.replace("<title>Painel Departamentos — Equipe GYN</title>", f"<title>{titulo}</title>")
