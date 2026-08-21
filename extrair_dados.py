@@ -67,12 +67,13 @@ CATEGORIAS = [
     ("thermo", "Thermo", 39),         # AM
 ]
 
-# Colunas que têm meta fixa na linha 5 (numérica, direta). As demais
-# (saborizadas/AB, lacteos/AD, thermo/AM) não têm célula própria na linha 5 —
-# a meta é lida do texto "MINIMO N" no cabeçalho de cada bloco.
-COLUNAS_COM_META_LINHA5 = {14, 16, 18, 20, 22, 24, 26}
-
-LINHA_MINIMOS = 5
+# Até 19/08 só saborizadas/AB, lacteos/AD e thermo/AM tinham o texto
+# "MINIMO N" no cabeçalho de cada bloco — as outras 7 categorias usavam um
+# valor numérico fixo da linha 5 (mesmo pra todo mundo). Confirmado em 21/08
+# que agora TODO bloco de supervisor tem seu próprio "MINIMO N" pras 10
+# categorias (e alguns minimos mudaram, ex: Bovino é 15 e não mais 10) —
+# a linha 5 ficou obsoleta, a meta de cada categoria sempre vem do texto do
+# cabeçalho do bloco correspondente.
 
 
 def _num(v):
@@ -105,11 +106,9 @@ def extrair():
     def val(row, col):
         return _num(ws.cell(row=row, column=col).value)
 
-    metas_globais = {chave: val(LINHA_MINIMOS, col) for chave, _, col in CATEGORIAS if col in COLUNAS_COM_META_LINHA5}
-
     rcas = []
     supervisor_atual = None
-    metas_bloco = dict(metas_globais)
+    metas_bloco = {}
 
     for r in range(1, ws.max_row + 1):
         c3 = ws.cell(row=r, column=3).value
@@ -118,10 +117,7 @@ def extrair():
         if isinstance(c3, str) and c4 is None and c3 not in ("TOTAL",):
             # Linha de cabeçalho de bloco (nome do supervisor)
             supervisor_atual = NORMALIZAR_SUPERVISOR.get(c3.strip(), c3.strip())
-            metas_bloco = dict(metas_globais)
-            for chave, _, col in CATEGORIAS:
-                if col not in COLUNAS_COM_META_LINHA5:
-                    metas_bloco[chave] = _parse_minimo(ws.cell(row=r, column=col).value)
+            metas_bloco = {chave: _parse_minimo(ws.cell(row=r, column=col).value) for chave, _, col in CATEGORIAS}
             continue
 
         if not isinstance(c3, int) or not c4 or supervisor_atual is None:
