@@ -62,10 +62,11 @@ CATEGORIAS = [
     ("calabresa", "Calabresa", 22),   # V
     ("paes", "Pães", 24),             # X
     ("frescais", "Frescais", 26),     # Z
-    ("saborizadas", "Saborizadas", 28),  # AB
     ("lacteos", "Lácteos", 30),       # AD
     ("thermo", "Thermo", 39),         # AM
 ]
+# "saborizadas" (col AB) retirada do painel a pedido do Edmar (25/08) —
+# fica de fora da contagem "bateu a meta" também.
 
 # Até 19/08 só saborizadas/AB, lacteos/AD e thermo/AM tinham o texto
 # "MINIMO N" no cabeçalho de cada bloco — as outras 7 categorias usavam um

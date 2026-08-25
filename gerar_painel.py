@@ -463,7 +463,7 @@ const FOTO_TET = __FOTO_TET_JSON__;
 const ORDEM_CATEGORIAS = [
   ["bacon", "Bacon"], ["bovino", "Bovino"], ["batata", "Batata"], ["suino", "Suíno"],
   ["calabresa", "Calabresa"], ["paes", "Pães"], ["frescais", "Frescais"],
-  ["saborizadas", "Saborizadas"], ["lacteos", "Lácteos"], ["thermo", "Thermo"],
+  ["lacteos", "Lácteos"], ["thermo", "Thermo"],
 ];
 
 // Meta Posit editada no Painel Performance (melhoria-salarial) escreve
