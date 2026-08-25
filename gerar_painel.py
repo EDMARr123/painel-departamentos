@@ -466,6 +466,29 @@ const ORDEM_CATEGORIAS = [
   ["saborizadas", "Saborizadas"], ["lacteos", "Lácteos"], ["thermo", "Thermo"],
 ];
 
+// Meta Posit editada no Painel Performance (melhoria-salarial) escreve
+// aqui — mesmo domínio do GitHub Pages (edmarr123.github.io), então o
+// localStorage é compartilhado entre os dois painéis. Aplica antes de
+// montar qualquer card/agregado, pra tudo (inclusive o resumo por
+// supervisor) já sair recalculado com a meta editada.
+function aplicarOverridesMetaPosit(dados) {
+  let overrides = {};
+  try { overrides = JSON.parse(localStorage.getItem("mps_overrides_v1") || "{}"); } catch (e) {}
+  dados.forEach(r => {
+    const over = overrides[r.codigo];
+    if (!over) return;
+    let atingidas = 0;
+    ORDEM_CATEGORIAS.forEach(([chave]) => {
+      const cat = r.categorias[chave];
+      if (over[chave] !== undefined) cat.meta = over[chave];
+      cat.bateu = cat.meta ? cat.real >= cat.meta : false;
+      if (cat.bateu) atingidas++;
+    });
+    r.categorias_atingidas = atingidas;
+    r.bateu = atingidas === r.total_categorias;
+  });
+}
+
 function normalizarNomeFoto(nome) {
   return nome.replace(/\s*-\s*$/, "").trim().toUpperCase();
 }
@@ -641,6 +664,7 @@ function montar() {
     .join("");
 }
 
+aplicarOverridesMetaPosit(DADOS);
 montar();
 </script>
 </body>
