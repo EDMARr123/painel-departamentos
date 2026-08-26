@@ -372,6 +372,15 @@ header.top {
   font-weight: 800;
   font-variant-numeric: tabular-nums;
 }
+.cont-titulo {
+  text-align: center;
+  font-size: 11.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-faint);
+  margin: 8px 0 4px;
+}
 .cont-row-principal {
   display: flex;
   justify-content: center;
@@ -611,6 +620,8 @@ function card(rca) {
       <span class="v" style="color:var(--${corB})">${rca.categorias_atingidas} / ${rca.total_categorias}</span>
     </div>
 
+    <div class="cont-titulo">Média de Pedidos</div>
+
     <div class="cont-row">
       <span class="stat">
         <span class="l">Anterior</span>
@@ -624,7 +635,7 @@ function card(rca) {
       <span class="sep"></span>
       <span class="stat">
         <span class="l">Atual</span>
-        <span class="v">${fmtNum2(rca.posit_atual)}</span>
+        <span class="v">${Math.round(rca.posit_atual)}</span>
       </span>
     </div>
 
