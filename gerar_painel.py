@@ -374,12 +374,12 @@ header.top {
 }
 .cont-titulo {
   text-align: center;
-  font-size: 11.5px;
+  font-size: 15px;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--ink-faint);
-  margin: 8px 0 4px;
+  letter-spacing: 0.04em;
+  color: var(--good);
+  margin: 2px 0;
 }
 .cont-row-principal {
   display: flex;
