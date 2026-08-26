@@ -506,19 +506,11 @@ function fmtValor(chave, v) {
   return Number(v).toLocaleString("pt-BR", { maximumFractionDigits: 0 });
 }
 
-function fmtPct(v) {
-  return (v * 100).toLocaleString("pt-BR", { maximumFractionDigits: 0 }) + "%";
-}
-
-// Média de quanto cada categoria atingiu da própria meta (realizado/meta),
-// não é média do número bruto de positivação — assim uma categoria com
-// meta 40 pesa igual a uma com meta 8 na média.
+// Média de positivação realizada por categoria (número inteiro de
+// clientes/itens, não percentual).
 function mediaPositivacao(rca) {
-  const pcts = ORDEM_CATEGORIAS.map(([chave]) => {
-    const cat = rca.categorias[chave];
-    return cat.meta ? cat.real / cat.meta : 0;
-  });
-  return pcts.reduce((s, v) => s + v, 0) / pcts.length;
+  const reais = ORDEM_CATEGORIAS.map(([chave]) => rca.categorias[chave].real);
+  return Math.round(reais.reduce((s, v) => s + v, 0) / reais.length);
 }
 
 function iniciais(nome) {
@@ -593,7 +585,7 @@ function card(rca) {
       <span class="sep"></span>
       <span class="stat">
         <span class="l">Média</span>
-        <span class="v" style="color:var(--${corB})">${fmtPct(mediaPositivacao(rca))}</span>
+        <span class="v" style="color:var(--${corB})">${mediaPositivacao(rca)}</span>
       </span>
     </div>
 
