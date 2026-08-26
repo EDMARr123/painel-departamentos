@@ -36,6 +36,7 @@ import re
 import openpyxl
 
 CAMINHO_RESULTADO = r"C:\Users\edmar\Desktop\ACOMPANHA RESULTADO\RESULTADO.xlsx"
+CAMINHO_MELHORIA_SALARIAL = r"c:\AutomacaoMaxGestao\melhoria_salarial\dados.json"
 
 PASTA_BASE = os.path.dirname(os.path.abspath(__file__))
 CAMINHO_SAIDA = os.path.join(PASTA_BASE, "dados.json")
@@ -100,12 +101,30 @@ def _nome_e_rota(nome_completo):
     return nome, rota
 
 
+def _ler_media_pedidos_atual():
+    """Cross-referencia com o painel Performance (melhoria_salarial) pra
+    pegar a média de pedidos/dia do mês ATUAL de cada RCA (total de
+    pedidos do mês / dias úteis) — precisa rodar depois do
+    melhoria_salarial/extrair_dados.py pra pegar o dado mais recente."""
+    if not os.path.exists(CAMINHO_MELHORIA_SALARIAL):
+        return {}
+    with open(CAMINHO_MELHORIA_SALARIAL, "r", encoding="utf-8") as f:
+        dados = json.load(f)
+    dias_uteis = dados["constantes"]["dias_uteis"] or 1
+    return {
+        str(r["codigo"]): round(r["total_pedidos"] / dias_uteis)
+        for r in dados["rcas"]
+    }
+
+
 def extrair():
     wb = openpyxl.load_workbook(CAMINHO_RESULTADO, data_only=True)
     ws = wb["MES ATUAL"]
 
     def val(row, col):
         return _num(ws.cell(row=row, column=col).value)
+
+    media_pedidos_atual = _ler_media_pedidos_atual()
 
     rcas = []
     supervisor_atual = None
@@ -145,6 +164,7 @@ def extrair():
             "categorias_atingidas": atingidas,
             "total_categorias": len(CATEGORIAS),
             "bateu": atingidas == len(CATEGORIAS),
+            "media_pedidos_atual": media_pedidos_atual.get(str(c3), 0),
         })
 
     return rcas

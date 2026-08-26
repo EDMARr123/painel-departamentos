@@ -587,6 +587,11 @@ function card(rca) {
         <span class="l">Média pedidos mês anterior</span>
         <span class="v" style="color:var(--${corB})">${mediaPositivacao(rca)}</span>
       </span>
+      <span class="sep"></span>
+      <span class="stat">
+        <span class="l">Média pedidos mês atual</span>
+        <span class="v">${rca.media_pedidos_atual}</span>
+      </span>
     </div>
 
     <div class="dept-list">
@@ -629,6 +634,7 @@ function agregarTime(dados, nomeSupervisor) {
     categorias_atingidas: atingidas,
     total_categorias: ORDEM_CATEGORIAS.length,
     bateu: atingidas === ORDEM_CATEGORIAS.length,
+    media_pedidos_atual: dados.reduce((s, r) => s + r.media_pedidos_atual, 0),
   };
 }
 
