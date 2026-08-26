@@ -372,6 +372,30 @@ header.top {
   font-weight: 800;
   font-variant-numeric: tabular-nums;
 }
+.cont-row-principal {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  text-align: center;
+  margin-bottom: 6px;
+}
+.cont-row-principal .l {
+  font-size: 14px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+}
+.cont-row-principal .v {
+  font-size: 15px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
 
 .dept-list {
   display: flex;
@@ -578,12 +602,12 @@ function card(rca) {
       </div>
     </div>
 
+    <div class="cont-row-principal">
+      <span class="l">Positivação por departamento</span>
+      <span class="v" style="color:var(--${corB})">${rca.categorias_atingidas} / ${rca.total_categorias}</span>
+    </div>
+
     <div class="cont-row">
-      <span class="stat">
-        <span class="l">Positivação por departamento</span>
-        <span class="v" style="color:var(--${corB})">${rca.categorias_atingidas} / ${rca.total_categorias}</span>
-      </span>
-      <span class="sep"></span>
       <span class="stat">
         <span class="l">Méd. mês anterior</span>
         <span class="v" style="color:var(--${corB})">${mediaPositivacao(rca)}</span>
