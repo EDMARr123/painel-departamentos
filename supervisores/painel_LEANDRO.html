@@ -407,7 +407,7 @@ footer.foot {
   <header class="top">
     <div class="title-block">
       <h1>Painel Departamentos</h1>
-      <p>Meta mínima por categoria de produto — atualizado em 26/08/2026 19:34</p>
+      <p>Meta mínima por categoria de produto — atualizado em 26/08/2026 19:47</p>
     </div>
     <div style="display:flex;align-items:center;gap:16px;">
       <div class="summary-strip" id="summary"></div>
@@ -464,12 +464,15 @@ function aplicarOverridesMetaPosit(dados) {
 // Performance (mesmo domínio do GitHub Pages, localStorage compartilhado),
 // usa esse valor vivo em vez do que foi congelado na última extração.
 function aplicarOverrideMetaPedidosDia(dados) {
-  let valor;
-  try { valor = localStorage.getItem("meta_pedidos_dia_override_v1"); } catch (e) { valor = null; }
-  if (valor === null || valor === "") return;
-  const num = Number(valor);
-  if (isNaN(num)) return;
-  dados.forEach(r => { r.media_pedidos_atual = Math.round(num); });
+  let overrides = {};
+  try { overrides = JSON.parse(localStorage.getItem("meta_pedidos_dia_overrides_v1") || "{}"); } catch (e) {}
+  dados.forEach(r => {
+    const valor = overrides[r.codigo];
+    if (valor === undefined) return;
+    const num = Number(valor);
+    if (isNaN(num)) return;
+    r.media_pedidos_atual = Math.round(num);
+  });
 }
 
 function normalizarNomeFoto(nome) {

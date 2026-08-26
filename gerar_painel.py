@@ -530,12 +530,15 @@ function aplicarOverridesMetaPosit(dados) {
 // Performance (mesmo domínio do GitHub Pages, localStorage compartilhado),
 // usa esse valor vivo em vez do que foi congelado na última extração.
 function aplicarOverrideMetaPedidosDia(dados) {
-  let valor;
-  try { valor = localStorage.getItem("meta_pedidos_dia_override_v1"); } catch (e) { valor = null; }
-  if (valor === null || valor === "") return;
-  const num = Number(valor);
-  if (isNaN(num)) return;
-  dados.forEach(r => { r.media_pedidos_atual = Math.round(num); });
+  let overrides = {};
+  try { overrides = JSON.parse(localStorage.getItem("meta_pedidos_dia_overrides_v1") || "{}"); } catch (e) {}
+  dados.forEach(r => {
+    const valor = overrides[r.codigo];
+    if (valor === undefined) return;
+    const num = Number(valor);
+    if (isNaN(num)) return;
+    r.media_pedidos_atual = Math.round(num);
+  });
 }
 
 function normalizarNomeFoto(nome) {
