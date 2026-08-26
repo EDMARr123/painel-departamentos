@@ -584,7 +584,7 @@ function card(rca) {
       </span>
       <span class="sep"></span>
       <span class="stat">
-        <span class="l">Média</span>
+        <span class="l">Média pedidos mês anterior</span>
         <span class="v" style="color:var(--${corB})">${mediaPositivacao(rca)}</span>
       </span>
     </div>
