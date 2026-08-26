@@ -531,6 +531,10 @@ function fmtValor(chave, v) {
   return Number(v).toLocaleString("pt-BR", { maximumFractionDigits: 0 });
 }
 
+function fmtNum2(v) {
+  return Number(v).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
 // Média de positivação realizada por categoria (número inteiro de
 // clientes/itens, não percentual).
 function mediaPositivacao(rca) {
@@ -617,6 +621,11 @@ function card(rca) {
         <span class="l">Méd. mês atual</span>
         <span class="v">${rca.media_pedidos_atual}</span>
       </span>
+      <span class="sep"></span>
+      <span class="stat">
+        <span class="l">Posit.atual</span>
+        <span class="v">${fmtNum2(rca.posit_atual)}</span>
+      </span>
     </div>
 
     <div class="dept-list">
@@ -660,6 +669,7 @@ function agregarTime(dados, nomeSupervisor) {
     total_categorias: ORDEM_CATEGORIAS.length,
     bateu: atingidas === ORDEM_CATEGORIAS.length,
     media_pedidos_atual: dados.reduce((s, r) => s + r.media_pedidos_atual, 0),
+    posit_atual: dados.reduce((s, r) => s + r.posit_atual, 0) / (dados.length || 1),
   };
 }
 

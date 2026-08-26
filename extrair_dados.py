@@ -37,6 +37,7 @@ import openpyxl
 
 CAMINHO_RESULTADO = r"C:\Users\edmar\Desktop\ACOMPANHA RESULTADO\RESULTADO.xlsx"
 CAMINHO_MELHORIA_SALARIAL = r"c:\AutomacaoMaxGestao\melhoria_salarial\dados.json"
+CAMINHO_PAINEL_PILARES = r"c:\AutomacaoMaxGestao\painel_pilares\dados.json"
 
 PASTA_BASE = os.path.dirname(os.path.abspath(__file__))
 CAMINHO_SAIDA = os.path.join(PASTA_BASE, "dados.json")
@@ -117,6 +118,18 @@ def _ler_media_pedidos_atual():
     }
 
 
+def _ler_posit_atual():
+    """Cross-referencia com o Painel 4 Pilares pra pegar a 'Média de
+    pedidos' (coluna BD da SOMA NAO SALVA ENCIMA.xlsx) de cada RCA — é uma
+    métrica diferente da 'média pedidos mês atual' (essa vem do total de
+    pedidos ÷ dias úteis calculado no Performance)."""
+    if not os.path.exists(CAMINHO_PAINEL_PILARES):
+        return {}
+    with open(CAMINHO_PAINEL_PILARES, "r", encoding="utf-8") as f:
+        dados = json.load(f)
+    return {str(r["codigo"]): r["media_pedidos"] for r in dados}
+
+
 def extrair():
     wb = openpyxl.load_workbook(CAMINHO_RESULTADO, data_only=True)
     ws = wb["MES ATUAL"]
@@ -125,6 +138,7 @@ def extrair():
         return _num(ws.cell(row=row, column=col).value)
 
     media_pedidos_atual = _ler_media_pedidos_atual()
+    posit_atual = _ler_posit_atual()
 
     rcas = []
     supervisor_atual = None
@@ -165,6 +179,7 @@ def extrair():
             "total_categorias": len(CATEGORIAS),
             "bateu": atingidas == len(CATEGORIAS),
             "media_pedidos_atual": media_pedidos_atual.get(str(c3), 0),
+            "posit_atual": posit_atual.get(str(c3), 0),
         })
 
     return rcas
