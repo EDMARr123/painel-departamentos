@@ -102,20 +102,17 @@ def _nome_e_rota(nome_completo):
     return nome, rota
 
 
-def _ler_media_pedidos_atual():
+def _ler_meta_pedidos_dia():
     """Cross-referencia com o painel Performance (melhoria_salarial) pra
-    pegar a média de pedidos/dia do mês ATUAL de cada RCA (total de
-    pedidos do mês / dias úteis) — precisa rodar depois do
-    melhoria_salarial/extrair_dados.py pra pegar o dado mais recente."""
+    pegar a Meta de Pedidos/Dia — é um valor ÚNICO (não por RCA), o mesmo
+    "desafio" pra equipe toda; quando o Edmar edita esse campo no
+    Performance, o valor vivo (do navegador) sobrepõe este aqui via
+    localStorage compartilhado (ver JS de painel_departamentos)."""
     if not os.path.exists(CAMINHO_MELHORIA_SALARIAL):
-        return {}
+        return 0
     with open(CAMINHO_MELHORIA_SALARIAL, "r", encoding="utf-8") as f:
         dados = json.load(f)
-    dias_uteis = dados["constantes"]["dias_uteis"] or 1
-    return {
-        str(r["codigo"]): round(r["total_pedidos"] / dias_uteis)
-        for r in dados["rcas"]
-    }
+    return round(dados["constantes"]["meta_pedidos_dia"])
 
 
 def _ler_posit_atual():
@@ -137,7 +134,7 @@ def extrair():
     def val(row, col):
         return _num(ws.cell(row=row, column=col).value)
 
-    media_pedidos_atual = _ler_media_pedidos_atual()
+    meta_pedidos_dia = _ler_meta_pedidos_dia()
     posit_atual = _ler_posit_atual()
 
     rcas = []
@@ -178,7 +175,7 @@ def extrair():
             "categorias_atingidas": atingidas,
             "total_categorias": len(CATEGORIAS),
             "bateu": atingidas == len(CATEGORIAS),
-            "media_pedidos_atual": media_pedidos_atual.get(str(c3), 0),
+            "media_pedidos_atual": meta_pedidos_dia,
             "posit_atual": posit_atual.get(str(c3), 0),
         })
 
