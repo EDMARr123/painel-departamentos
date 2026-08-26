@@ -348,14 +348,17 @@ header.top {
 .cont-row {
   display: flex;
   justify-content: center;
-  align-items: baseline;
-  gap: 10px;
+  align-items: center;
+  gap: 18px;
   padding: 10px 12px;
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: 10px;
   text-align: center;
+  flex-wrap: wrap;
 }
+.cont-row .stat { display: flex; align-items: baseline; gap: 10px; }
+.cont-row .sep { width: 1px; align-self: stretch; background: var(--border); }
 .cont-row .l {
   font-size: 14px;
   font-weight: 800;
@@ -503,6 +506,21 @@ function fmtValor(chave, v) {
   return Number(v).toLocaleString("pt-BR", { maximumFractionDigits: 0 });
 }
 
+function fmtPct(v) {
+  return (v * 100).toLocaleString("pt-BR", { maximumFractionDigits: 0 }) + "%";
+}
+
+// Média de quanto cada categoria atingiu da própria meta (realizado/meta),
+// não é média do número bruto de positivação — assim uma categoria com
+// meta 40 pesa igual a uma com meta 8 na média.
+function mediaPositivacao(rca) {
+  const pcts = ORDEM_CATEGORIAS.map(([chave]) => {
+    const cat = rca.categorias[chave];
+    return cat.meta ? cat.real / cat.meta : 0;
+  });
+  return pcts.reduce((s, v) => s + v, 0) / pcts.length;
+}
+
 function iniciais(nome) {
   return nome.split(/\s+/).filter(Boolean).slice(0, 2).map(p => p[0]).join("").toUpperCase();
 }
@@ -568,8 +586,15 @@ function card(rca) {
     </div>
 
     <div class="cont-row">
-      <span class="l">Positivação por departamento</span>
-      <span class="v" style="color:var(--${corB})">${rca.categorias_atingidas} / ${rca.total_categorias}</span>
+      <span class="stat">
+        <span class="l">Positivação por departamento</span>
+        <span class="v" style="color:var(--${corB})">${rca.categorias_atingidas} / ${rca.total_categorias}</span>
+      </span>
+      <span class="sep"></span>
+      <span class="stat">
+        <span class="l">Média</span>
+        <span class="v" style="color:var(--${corB})">${fmtPct(mediaPositivacao(rca))}</span>
+      </span>
     </div>
 
     <div class="dept-list">
