@@ -639,11 +639,6 @@ function card(rca) {
 
     <div class="cont-row">
       <span class="stat">
-        <span class="l">Anterior</span>
-        <span class="v" style="color:var(--${corB})">${mediaPositivacao(rca)}</span>
-      </span>
-      <span class="sep"></span>
-      <span class="stat">
         <span class="l">Desafio</span>
         <span class="v">${rca.media_pedidos_atual}</span>
       </span>
