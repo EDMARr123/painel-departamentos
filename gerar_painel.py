@@ -414,7 +414,7 @@ header.top {
 
 .dept-row {
   display: grid;
-  grid-template-columns: 1fr 82px 108px;
+  grid-template-columns: 1fr 82px 108px 26px;
   align-items: center;
   column-gap: 10px;
   background: var(--surface-2);
@@ -597,9 +597,10 @@ function linhaDepartamento(chave, label, cat) {
   const cor = cat.bateu ? "good" : "bad";
   return `
     <div class="dept-row" style="border-left-color:var(--${cor})">
-      <span class="label">${cat.bateu ? '<span title="Meta atingida" style="margin-right:6px;font-size:20px;line-height:1;vertical-align:-3px">🏆</span>' : ""}${label}</span>
+      <span class="label">${label}</span>
       <span class="meta">Meta ${fmtValor(chave, cat.meta)}</span>
       <span class="valor" style="background:var(--${cor}-soft)">Realizado <span style="color:var(--${cor})">${fmtValor(chave, cat.real)}</span></span>
+      <span title="${cat.bateu ? "Meta atingida" : ""}" style="font-size:20px;line-height:1;text-align:right">${cat.bateu ? "🏆" : ""}</span>
     </div>`;
 }
 
