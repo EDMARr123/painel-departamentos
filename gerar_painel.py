@@ -468,6 +468,10 @@ footer.foot {
 </style>
 </head>
 <body>
+<style>
+.modo-vendedor #summary, .modo-vendedor #tabs, .modo-vendedor #resumoTime { display: none !important; }
+.modo-vendedor #grid { grid-template-columns: minmax(0, 480px); justify-content: center; }
+</style>
 
 <div class="wrap">
   <header class="top">
@@ -496,6 +500,18 @@ const DADOS = __DADOS_JSON__;
 const FOTOS_SUPERVISORES = __FOTOS_SUPERVISORES_JSON__;
 const FOTOS_RCAS = __FOTOS_RCAS_JSON__;
 const FOTO_TET = __FOTO_TET_JSON__;
+
+// ---- Link individual por vendedor: painel.html?rca=15 ----
+// Mostra só o card daquele RCA (sem resumo, abas e card do time), pra cada
+// vendedor acompanhar o próprio resultado. Ver links.html.
+const RCA_LINK = new URLSearchParams(location.search).get("rca");
+if (RCA_LINK) {
+  const so = DADOS.filter(r => String(r.codigo) === String(RCA_LINK));
+  DADOS.length = 0;
+  DADOS.push(...so);
+  document.body.classList.add("modo-vendedor");
+  document.querySelector("header.top h1").textContent = so.length ? "Meu resultado" : "RCA " + RCA_LINK + " não encontrado";
+}
 
 const ORDEM_CATEGORIAS = [
   ["bacon", "Bacon"], ["bovino", "Bovino"], ["batata", "Batata"], ["suino", "Suíno"],
@@ -823,7 +839,7 @@ def gerar_html(dados, titulo="Painel Departamentos — Equipe GYN"):
     return html
 
 
-if __name__ == "__main__":
+def main():
     with open(CAMINHO_DADOS, "r", encoding="utf-8") as f:
         dados = json.load(f)
 
@@ -839,3 +855,55 @@ if __name__ == "__main__":
         with open(caminho, "w", encoding="utf-8") as f:
             f.write(gerar_html(dados_sup, titulo=f"Painel Departamentos — {sup}"))
         print(f"  -> Painel de {sup} gerado em: {caminho}")
+
+    gerar_links(dados)
+
+
+URL_PAINEL = "https://edmarr123.github.io/painel-departamentos/painel.html"
+ORDEM_SUPERVISORES = ["LEANDRO", "FLAVIANE", "IDEGLAN", "RICARDO", "RICHARD", "RODRIGO"]
+
+
+def gerar_links(dados):
+    """links.html: o link individual (painel.html?rca=X) de cada vendedor,
+    separado por supervisor — mesmo formato da página de links do Performance."""
+    import html as _h
+    grupos = {}
+    for r in dados:
+        grupos.setdefault(r["supervisor"], []).append(r)
+    ordem = [s for s in ORDEM_SUPERVISORES if s in grupos] + sorted(s for s in grupos if s not in ORDEM_SUPERVISORES)
+    blocos = []
+    for sup in ordem:
+        linhas = "".join(
+            f'<tr><td class="cod">{r["codigo"]}</td><td>{_h.escape(r["nome"])}</td>'
+            f'<td><a href="{URL_PAINEL}?rca={r["codigo"]}" target="_blank">{URL_PAINEL}?rca={r["codigo"]}</a></td>'
+            f'<td><button onclick="copiar(this, \'{URL_PAINEL}?rca={r["codigo"]}\')">Copiar</button></td></tr>'
+            for r in sorted(grupos[sup], key=lambda x: x["nome"])
+        )
+        blocos.append(f'<section><h2>Supervisor {sup} <span>{len(grupos[sup])} vendedores</span></h2>'
+                      f'<table><thead><tr><th>RCA</th><th>Vendedor</th><th>Link</th><th></th></tr></thead><tbody>{linhas}</tbody></table></section>')
+    pagina = f"""<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Links Departamentos</title>
+<style>
+body{{margin:0;background:#F3F2EC;font-family:Segoe UI,Arial,sans-serif;color:#1E2320}}
+main{{max-width:1100px;margin:0 auto;padding:28px 16px}}
+h1{{margin:0 0 4px}} p.sub{{margin:0 0 22px;color:#6B706B}}
+section{{background:#fff;border-radius:14px;padding:18px 20px;margin-bottom:18px;box-shadow:0 4px 14px rgba(0,0,0,.06)}}
+h2{{margin:0 0 10px;font-size:18px;color:#1D9A5D}} h2 span{{font-size:13px;color:#8A8F8A;font-weight:600;margin-left:8px}}
+table{{width:100%;border-collapse:collapse;font-size:14px}} th{{text-align:left;font-size:11px;color:#8A8F8A;text-transform:uppercase;padding:6px 8px}}
+td{{padding:8px;border-top:1px solid #EEE;word-break:break-all}} td.cod{{font-weight:700;width:50px}}
+a{{color:#1D6FB8}} button{{background:#1D9A5D;color:#fff;border:0;border-radius:8px;padding:6px 12px;font-weight:700;cursor:pointer}}
+</style></head><body><main>
+<h1>Links do Painel Departamentos</h1>
+<p class="sub">Cada vendedor abre o próprio link e acompanha o resultado dele (meta x realizado por departamento e média de pedidos).</p>
+{''.join(blocos)}
+</main><script>
+function copiar(btn, url){{navigator.clipboard.writeText(url).then(()=>{{btn.textContent='Copiado!';setTimeout(()=>btn.textContent='Copiar',1500)}},()=>prompt('Copie o link:',url));}}
+</script></body></html>"""
+    caminho = os.path.join(os.path.dirname(CAMINHO_SAIDA), "links.html")
+    with open(caminho, "w", encoding="utf-8") as f:
+        f.write(pagina)
+    print(f"Links gerados: {len(dados)} em {caminho}")
+
+
+if __name__ == "__main__":
+    main()
