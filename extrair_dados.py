@@ -36,10 +36,12 @@ import re
 import openpyxl
 
 CAMINHO_RESULTADO = r"C:\Users\edmar\Desktop\ACOMPANHA RESULTADO\RESULTADO.xlsx"
-CAMINHO_MELHORIA_SALARIAL = r"c:\AutomacaoMaxGestao\melhoria_salarial\dados.json"
-CAMINHO_PAINEL_PILARES = r"c:\AutomacaoMaxGestao\painel_pilares\dados.json"
-
 PASTA_BASE = os.path.dirname(os.path.abspath(__file__))
+# Caminhos relativos: a pasta do projeto mudou de C:\AutomacaoMaxGestao para
+# C:\Drivers\AutomacaoMaxGestao e o caminho fixo antigo deixou de existir.
+CAMINHO_MELHORIA_SALARIAL = os.path.join(PASTA_BASE, "..", "melhoria_salarial", "dados.json")
+CAMINHO_PAINEL_PILARES = os.path.join(PASTA_BASE, "..", "painel_pilares", "dados.json")
+
 CAMINHO_SAIDA = os.path.join(PASTA_BASE, "dados.json")
 
 # Nome do supervisor na planilha -> nome de exibição/agrupamento no painel.
@@ -97,7 +99,7 @@ def _nome_e_rota(nome_completo):
     """'FABIO L. - GYN RT 21 - SEG 01' -> ('FABIO L.', 'GYN RT 21 - SEG 01')
     Nomes sem ' - ' (com espaços dos dois lados) ficam só com o nome, sem rota."""
     partes = [p.strip() for p in nome_completo.split(" - ")]
-    nome = partes[0].strip()
+    nome = partes[0].strip().rstrip("-").strip()  # "LUIZ GUSTAVO -" -> "LUIZ GUSTAVO"
     rota = " - ".join(p for p in partes[1:] if p).strip()
     return nome, rota
 
@@ -154,6 +156,15 @@ def extrair():
         if not isinstance(c3, int) or not c4 or supervisor_atual is None:
             continue
 
+        # AJUSTE (07/10): linhas novas vêm com o código na frente do nome
+        # ("722 - LUIZ GUSTAVO -"). Tira o código do nome e, se ele divergir da
+        # coluna C (ex.: C=678 com "679 - RAFAEL COSTA"), vale o do nome.
+        m = re.match(r"\s*(\d+)\s*-\s*(.*)$", str(c4))
+        if m:
+            if int(m.group(1)) != c3:
+                print(f"  Aviso: código {c3} na coluna C, mas o nome diz {m.group(1)} ({m.group(2).strip()}); usando {m.group(1)}.")
+                c3 = int(m.group(1))
+            c4 = m.group(2)
         nome_rca, rota = _nome_e_rota(str(c4))
 
         categorias_dados = {}
