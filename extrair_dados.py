@@ -193,8 +193,53 @@ def extrair():
     return rcas
 
 
+URL_PLANILHA_METAS = "https://script.google.com/macros/s/AKfycbwg-btEbvpUKtnkijNgUJ4gXQHr_bAyNxfmkPCFN1Zk-FE7IOi-2RgkjMeeMtLljmV01A/exec"
+MAPA_CATEGORIA_PERFORMANCE = {
+    "bacon": "bacon", "calabresa": "calabresa", "frescais": "frescais", "paes": "paes",
+    "lactios": "lacteos", "batata": "batata", "bovino": "bovino", "suino": "suino", "thermo_cat": "thermo",
+}
+
+
+def aplicar_metas_enviadas(rcas):
+    """Metas que cada vendedor enviou pelo botão "Feito" do Performance
+    (planilha Google). Gravadas nos dados para valer também nos links do
+    claude.ai, que não conseguem buscar a planilha ao abrir; o painel no
+    GitHub Pages ainda busca de novo ao abrir, pra pegar envios mais novos."""
+    import urllib.request
+    try:
+        with urllib.request.urlopen(URL_PLANILHA_METAS, timeout=60) as resp:
+            respostas = json.load(resp)
+    except Exception as e:
+        print(f"  Aviso: não consegui ler as metas enviadas pelos vendedores ({e}).")
+        return
+    por_rca = {str(x.get("rca")): x for x in respostas}
+    aplicadas = 0
+    for r in rcas:
+        x = por_rca.get(str(r["codigo"]))
+        if not x:
+            continue
+        est = x.get("estado") or {}
+        metas = est.get("metasCategoria") or {}
+        for chave_perf, chave_dep in MAPA_CATEGORIA_PERFORMANCE.items():
+            v = metas.get(chave_perf)
+            if isinstance(v, (int, float)) and chave_dep in r["categorias"]:
+                r["categorias"][chave_dep]["meta"] = v
+        atingidas = 0
+        for cat in r["categorias"].values():
+            cat["bateu"] = cat["real"] >= cat["meta"] if cat["meta"] else False
+            atingidas += cat["bateu"]
+        r["categorias_atingidas"] = atingidas
+        r["bateu"] = atingidas == r["total_categorias"]
+        desafio = est.get("metaPedidosDia", x.get("metaPedidosDia"))
+        if isinstance(desafio, (int, float)) and desafio > 0:
+            r["media_pedidos_atual"] = round(desafio)
+        aplicadas += 1
+    print(f"  Metas enviadas pelos vendedores aplicadas: {aplicadas} RCAs.")
+
+
 if __name__ == "__main__":
     dados = extrair()
+    aplicar_metas_enviadas(dados)
     with open(CAMINHO_SAIDA, "w", encoding="utf-8") as f:
         json.dump(dados, f, ensure_ascii=False, indent=2)
     print(f"{len(dados)} RCAs extraídos. Salvo em: {CAMINHO_SAIDA}")

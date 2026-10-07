@@ -748,9 +748,66 @@ function montar() {
     .join("");
 }
 
+// ---- Metas enviadas pelos vendedores (botão "Feito" do Performance) ----
+// A planilha Google (mesmo App da Web do Acompanhamento) guarda o último
+// envio de cada RCA. Vale mais que a meta da RESULTADO.xlsx e que o
+// localStorage: é o que o próprio vendedor preencheu no link dele.
+const URL_PLANILHA_METAS = "https://script.google.com/macros/s/AKfycbwg-btEbvpUKtnkijNgUJ4gXQHr_bAyNxfmkPCFN1Zk-FE7IOi-2RgkjMeeMtLljmV01A/exec";
+const MAPA_CATEGORIA_PERFORMANCE = {
+  bacon: "bacon", calabresa: "calabresa", frescais: "frescais", paes: "paes",
+  lactios: "lacteos", batata: "batata", bovino: "bovino", suino: "suino", thermo_cat: "thermo",
+};
+
+function aplicarMetasEnviadas(dados, respostas) {
+  const porRca = {};
+  respostas.forEach(x => { porRca[String(x.rca)] = x; });
+  let aplicadas = 0;
+  dados.forEach(r => {
+    const x = porRca[String(r.codigo)];
+    if (!x) return;
+    const est = x.estado || {};
+    const metas = est.metasCategoria || {};
+    Object.entries(MAPA_CATEGORIA_PERFORMANCE).forEach(([chavePerf, chaveDep]) => {
+      const v = Number(metas[chavePerf]);
+      if (metas[chavePerf] !== undefined && metas[chavePerf] !== "" && !isNaN(v) && r.categorias[chaveDep]) {
+        r.categorias[chaveDep].meta = v;
+      }
+    });
+    let atingidas = 0;
+    ORDEM_CATEGORIAS.forEach(([chave]) => {
+      const cat = r.categorias[chave];
+      cat.bateu = cat.meta ? cat.real >= cat.meta : false;
+      if (cat.bateu) atingidas++;
+    });
+    r.categorias_atingidas = atingidas;
+    r.bateu = atingidas === r.total_categorias;
+    const desafio = Number(est.metaPedidosDia ?? x.metaPedidosDia);
+    if (!isNaN(desafio) && desafio > 0) r.media_pedidos_atual = Math.round(desafio);
+    aplicadas++;
+  });
+  return aplicadas;
+}
+
+function remontarMantendoFiltro() {
+  montarResumo(DADOS);
+  document.getElementById("grid").innerHTML = DADOS
+    .slice()
+    .sort((a, b) => b.categorias_atingidas - a.categorias_atingidas || a.nome.localeCompare(b.nome))
+    .map(card)
+    .join("");
+  const ativa = document.querySelector(".tab.active");
+  if (ativa && ativa.dataset.sup !== "__todos__") { filtrar(ativa.dataset.sup); return; }
+  const supervisorUnico = new Set(DADOS.map(r => r.supervisor)).size === 1 ? DADOS[0].supervisor : "EQUIPE TODA";
+  montarResumoTime(DADOS, supervisorUnico);
+}
+
 aplicarOverridesMetaPosit(DADOS);
 aplicarOverrideMetaPedidosDia(DADOS);
 montar();
+fetch(URL_PLANILHA_METAS)
+  .then(r => r.json())
+  .then(lista => { if (aplicarMetasEnviadas(DADOS, lista)) remontarMantendoFiltro(); })
+  .catch(() => {});
 </script>
 </body>
 </html>
