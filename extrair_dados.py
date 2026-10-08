@@ -69,6 +69,8 @@ CATEGORIAS = [
     ("lacteos", "Lácteos", 30),       # AD
     ("thermo", "Thermo", 39),         # AM
 ]
+COL_MEDIA_PEDIDOS = 7  # G — "MEDIA"/"REAL": média de pedidos/dia do RCA no mês
+
 # "saborizadas" (col AB) retirada do painel a pedido do Edmar (25/08) —
 # fica de fora da contagem "bateu a meta" também.
 
@@ -187,7 +189,9 @@ def extrair():
             "total_categorias": len(CATEGORIAS),
             "bateu": atingidas == len(CATEGORIAS),
             "media_pedidos_atual": meta_pedidos_dia,
-            "posit_atual": posit_atual.get(str(c3), 0),
+            # AJUSTE (08/10): "Atual" passa a vir da coluna G da própria RESULTADO
+            # (MEDIA/REAL = média de pedidos/dia do RCA); o 4 Pilares só se a célula estiver vazia.
+            "posit_atual": val(r, COL_MEDIA_PEDIDOS) or posit_atual.get(str(c3), 0),
         })
 
     return rcas
