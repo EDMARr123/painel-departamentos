@@ -55,21 +55,25 @@ NORMALIZAR_SUPERVISOR = {
     "RODRIGO": "RODRIGO",
 }
 
-# (chave, rótulo de exibição, coluna do realizado)
-# Mix Médio (J) e SKU (L) ficam de fora — o painel mostra só as categorias
-# de produto.
+# (chave, rótulo de exibição, coluna padrão do realizado, início do texto do cabeçalho)
+# Mix Médio e SKU ficam de fora — o painel mostra só as categorias de produto.
+# AJUSTE (08/10): a planilha perdeu uma coluna e tudo andou 1 pra esquerda;
+# agora a coluna de cada categoria é achada pelo texto da linha de cabeçalho
+# ("RCA" / "VENDEDOR" / ... "BACON" ...). A coluna padrão só vale se o
+# cabeçalho não for encontrado.
 CATEGORIAS = [
-    ("bacon", "Bacon", 14),           # N
-    ("bovino", "Bovino", 16),         # P
-    ("batata", "Batata", 18),         # R
-    ("suino", "Suíno", 20),           # T
-    ("calabresa", "Calabresa", 22),   # V
-    ("paes", "Pães", 24),             # X
-    ("frescais", "Frescais", 26),     # Z
-    ("lacteos", "Lácteos", 30),       # AD
-    ("thermo", "Thermo", 39),         # AM
+    ("bacon", "Bacon", 13, "BACON"),            # M
+    ("bovino", "Bovino", 15, "BOVINO"),         # O
+    ("batata", "Batata", 17, "BATATA"),         # Q
+    ("suino", "Suíno", 19, "SUINO"),            # S
+    ("calabresa", "Calabresa", 21, "CALABRESA"),  # U
+    ("paes", "Pães", 23, "PÃES"),               # W
+    ("frescais", "Frescais", 25, "FRESCAIS"),   # Y
+    ("lacteos", "Lácteos", 29, "LACTEOS"),      # AC
+    ("thermo", "Thermo", 38, "THERMO"),         # AL
 ]
 COL_MEDIA_PEDIDOS = 7  # G — "MEDIA"/"REAL": média de pedidos/dia do RCA no mês
+CABECALHO_MEDIA = ("MEDIA", "REAL")
 
 # "saborizadas" (col AB) retirada do painel a pedido do Edmar (25/08) —
 # fica de fora da contagem "bateu a meta" também.
@@ -143,16 +147,37 @@ def extrair():
 
     rcas = []
     supervisor_atual = None
+    linha_supervisor = None
     metas_bloco = {}
+    cols = {chave: col for chave, _, col, _ in CATEGORIAS}
+    col_media = COL_MEDIA_PEDIDOS
 
     for r in range(1, ws.max_row + 1):
         c3 = ws.cell(row=r, column=3).value
         c4 = ws.cell(row=r, column=4).value
 
+        if isinstance(c3, str) and c3.strip() == "RCA":
+            # Linha "RCA / VENDEDOR / ... BACON ..." — localiza as colunas pelo texto
+            # e lê os "MINIMO N" da linha do supervisor logo acima, nas mesmas colunas.
+            textos = {c: str(ws.cell(row=r, column=c).value or "").strip().upper()
+                      for c in range(4, ws.max_column + 1)}
+            for chave, _, _, cab in CATEGORIAS:
+                achou = [c for c, t in textos.items() if t.startswith(cab)]
+                if achou:
+                    cols[chave] = achou[0]
+            achou = [c for c, t in textos.items() if t in CABECALHO_MEDIA]
+            if achou:
+                col_media = achou[0]
+            if linha_supervisor:
+                metas_bloco = {chave: _parse_minimo(ws.cell(row=linha_supervisor, column=cols[chave]).value)
+                               for chave, _, _, _ in CATEGORIAS}
+            continue
+
         if isinstance(c3, str) and c4 is None and c3 not in ("TOTAL",):
             # Linha de cabeçalho de bloco (nome do supervisor)
             supervisor_atual = NORMALIZAR_SUPERVISOR.get(c3.strip(), c3.strip())
-            metas_bloco = {chave: _parse_minimo(ws.cell(row=r, column=col).value) for chave, _, col in CATEGORIAS}
+            linha_supervisor = r
+            metas_bloco = {}
             continue
 
         if not isinstance(c3, int) or not c4 or supervisor_atual is None:
@@ -171,9 +196,9 @@ def extrair():
 
         categorias_dados = {}
         atingidas = 0
-        for chave, label, col in CATEGORIAS:
+        for chave, label, _, _ in CATEGORIAS:
             meta = metas_bloco.get(chave, 0)
-            real = val(r, col)
+            real = val(r, cols[chave])
             bateu_categoria = real >= meta if meta else False
             if bateu_categoria:
                 atingidas += 1
@@ -191,7 +216,7 @@ def extrair():
             "media_pedidos_atual": meta_pedidos_dia,
             # AJUSTE (08/10): "Atual" passa a vir da coluna G da própria RESULTADO
             # (MEDIA/REAL = média de pedidos/dia do RCA); o 4 Pilares só se a célula estiver vazia.
-            "posit_atual": val(r, COL_MEDIA_PEDIDOS) or posit_atual.get(str(c3), 0),
+            "posit_atual": val(r, col_media) or posit_atual.get(str(c3), 0),
         })
 
     return rcas
