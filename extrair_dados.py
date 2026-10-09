@@ -266,7 +266,20 @@ def aplicar_metas_enviadas(rcas):
     print(f"  Metas enviadas pelos vendedores aplicadas: {aplicadas} RCAs.")
 
 
+def _atualizar_mestres():
+    """Antes de ler: puxa os .xls para as planilhas mestre e acerta os dias
+    úteis/trabalhados (ver ..\\atualizar_mestres.py). Falha aqui não impede o painel."""
+    import sys
+    sys.path.insert(0, os.path.join(PASTA_BASE, ".."))
+    try:
+        from atualizar_mestres import atualizar_mestres
+        atualizar_mestres()
+    except Exception as e:
+        print(f"  Aviso: não consegui atualizar as planilhas mestre ({e}); usando os dados já salvos.")
+
+
 if __name__ == "__main__":
+    _atualizar_mestres()
     dados = extrair()
     aplicar_metas_enviadas(dados)
     with open(CAMINHO_SAIDA, "w", encoding="utf-8") as f:
