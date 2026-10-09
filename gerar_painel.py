@@ -505,6 +505,14 @@ const FOTO_TET = __FOTO_TET_JSON__;
 // Mostra só o card daquele RCA (sem resumo, abas e card do time), pra cada
 // vendedor acompanhar o próprio resultado. Ver links.html.
 const RCA_LINK = new URLSearchParams(location.search).get("rca");
+// AJUSTE (08/10): links individuais dos vendedores DESATIVADOS a pedido do
+// Edmar — quem abrir painel.html?rca=X vê só o aviso, sem dados.
+if (RCA_LINK) {
+  document.body.innerHTML = '<div style="font-family:sans-serif;max-width:520px;margin:80px auto;text-align:center;padding:24px">' +
+    '<h1 style="font-size:24px">Link desativado</h1>' +
+    '<p style="color:#555;font-size:16px">Este link não está mais disponível. Fale com o seu supervisor.</p></div>';
+  throw new Error("link de vendedor desativado");
+}
 if (RCA_LINK) {
   const so = DADOS.filter(r => String(r.codigo) === String(RCA_LINK));
   DADOS.length = 0;
@@ -857,7 +865,7 @@ def main():
             f.write(gerar_html(dados_sup, titulo=f"Painel Departamentos — {sup}"))
         print(f"  -> Painel de {sup} gerado em: {caminho}")
 
-    gerar_links(dados)
+    # gerar_links(dados)  # desativado em 08/10: vendedor não acessa mais pelo link individual
 
 
 URL_PAINEL = "https://edmarr123.github.io/painel-departamentos/painel.html"
