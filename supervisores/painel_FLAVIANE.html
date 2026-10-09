@@ -411,7 +411,7 @@ footer.foot {
   <header class="top">
     <div class="title-block">
       <h1>Painel Departamentos</h1>
-      <p>Meta mínima por categoria de produto — atualizado em 08/10/2026 23:21</p>
+      <p>Meta mínima por categoria de produto — atualizado em 08/10/2026 22:49</p>
     </div>
     <div style="display:flex;align-items:center;gap:16px;">
       <div class="summary-strip" id="summary"></div>
@@ -439,14 +439,6 @@ const FOTO_TET = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/7QCEUGhvdG9
 // Mostra só o card daquele RCA (sem resumo, abas e card do time), pra cada
 // vendedor acompanhar o próprio resultado. Ver links.html.
 const RCA_LINK = new URLSearchParams(location.search).get("rca");
-// AJUSTE (08/10): links individuais dos vendedores DESATIVADOS a pedido do
-// Edmar — quem abrir painel.html?rca=X vê só o aviso, sem dados.
-if (RCA_LINK) {
-  document.body.innerHTML = '<div style="font-family:sans-serif;max-width:520px;margin:80px auto;text-align:center;padding:24px">' +
-    '<h1 style="font-size:24px">Link desativado</h1>' +
-    '<p style="color:#555;font-size:16px">Este link não está mais disponível. Fale com o seu supervisor.</p></div>';
-  throw new Error("link de vendedor desativado");
-}
 if (RCA_LINK) {
   const so = DADOS.filter(r => String(r.codigo) === String(RCA_LINK));
   DADOS.length = 0;
