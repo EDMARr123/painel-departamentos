@@ -50,7 +50,8 @@ NORMALIZAR_SUPERVISOR = {
     "LEANDRO FREITAS": "LEANDRO",
     "FLAVIANE": "FLAVIANE",
     "IDEGLAN": "IDEGLAN",
-    "RICARDO": "RICARDO",
+    "RICARDO": "LUCAS",  # 16/10: RICARDO saiu; SUP LUCAS assumiu a Equipe Veteranos
+    "LUCAS": "LUCAS",
     "SUP RICHARD": "RICHARD",
     "RODRIGO": "RODRIGO",
 }

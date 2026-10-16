@@ -861,7 +861,7 @@ def main():
 
 
 URL_PAINEL = "https://edmarr123.github.io/painel-departamentos/painel.html"
-ORDEM_SUPERVISORES = ["LEANDRO", "FLAVIANE", "IDEGLAN", "RICARDO", "RICHARD", "RODRIGO"]
+ORDEM_SUPERVISORES = ["LEANDRO", "FLAVIANE", "IDEGLAN", "LUCAS", "RICHARD", "RODRIGO"]
 
 
 def gerar_links(dados):
