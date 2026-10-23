@@ -516,7 +516,7 @@ if (RCA_LINK) {
 const ORDEM_CATEGORIAS = [
   ["bacon", "Bacon"], ["bovino", "Bovino"], ["batata", "Batata"], ["suino", "Suíno"],
   ["calabresa", "Calabresa"], ["paes", "Pães"], ["frescais", "Frescais"],
-  ["lacteos", "Lácteos"], ["thermo", "Thermo"],
+  ["vegetais", "Vegetais"], ["lacteos", "Lácteos"], ["thermo", "Thermo"],
 ];
 
 // Meta Posit editada no Painel Performance (melhoria-salarial) escreve

@@ -70,6 +70,7 @@ CATEGORIAS = [
     ("calabresa", "Calabresa", 21, "CALABRESA"),  # U
     ("paes", "Pães", 23, "PÃES"),               # W
     ("frescais", "Frescais", 25, "FRESCAIS"),   # Y
+    ("vegetais", "Vegetais", 27, "VEGETAIS"),   # AA — entrou em 22/10
     ("lacteos", "Lácteos", 29, "LACTEOS"),      # AC
     ("thermo", "Thermo", 38, "THERMO"),         # AL
 ]
